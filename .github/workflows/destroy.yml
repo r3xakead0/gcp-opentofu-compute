@@ -32,7 +32,7 @@ jobs:
       - name: Setup Opentofu
         uses: opentofu/setup-opentofu@v1
         with:
-        tofu_version: "1.10.0"
+          tofu_version: "1.10.0"
 
       - name: OpenTofu Init
         env:
