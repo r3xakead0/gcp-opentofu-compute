@@ -5,6 +5,10 @@ on:
     branches: [ "main" ]
   pull_request:
 
+permissions:
+  contents: read
+  id-token: write # for GCP Workload Identity Federation
+
 jobs:
   opentofu:
     runs-on: ubuntu-latest
