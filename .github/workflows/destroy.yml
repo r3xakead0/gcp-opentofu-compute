@@ -42,7 +42,7 @@ jobs:
           service_account: ${{ secrets.GCP_SA_EMAIL }}
           project_id: ${{ vars.GCP_PROJECT_ID }}
 
-      - name: Setup Opentofu
+      - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v1
         with:
           tofu_version: "1.10.0"
@@ -54,4 +54,5 @@ jobs:
           chmod +x /usr/local/bin/terragrunt
 
       - name: Terragrunt Destroy
+        if: github.ref == 'refs/heads/main'
         run: terragrunt destroy --tf-path tofu --non-interactive -auto-approve

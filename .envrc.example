@@ -1,0 +1,3 @@
+export TG_STATE_PREFIX="terragrunt"
+export GCP_PROJECT_ID="project-478214"
+export GCS_BUCKET="project-478214-terragrunt-tfstate"
