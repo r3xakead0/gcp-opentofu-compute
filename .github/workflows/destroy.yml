@@ -54,4 +54,4 @@ jobs:
           chmod +x /usr/local/bin/terragrunt
 
       - name: Terragrunt Destroy
-        run: terragrunt destroy --terragrunt-tfpath tofu --terragrunt-non-interactive -auto-approve
+        run: terragrunt destroy --tf-path tofu --non-interactive -auto-approve

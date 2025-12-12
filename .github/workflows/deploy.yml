@@ -47,8 +47,8 @@ jobs:
 
       - name: Terragrunt Plan
         if: github.event_name == 'pull_request'
-        run: terragrunt plan --terragrunt-tfpath tofu --terragrunt-non-interactive
+        run: terragrunt plan --tf-path tofu --non-interactive
 
       - name: Terragrunt Apply
         if: github.ref == 'refs/heads/main'
-        run: terragrunt apply --terragrunt-tfpath tofu --terragrunt-non-interactive -auto-approve
+        run: terragrunt apply --tf-path tofu --non-interactive -auto-approve

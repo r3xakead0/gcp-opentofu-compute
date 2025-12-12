@@ -42,14 +42,14 @@ export TG_STATE_PREFIX="<repo>/opentofu"
 Plan/apply/destroy from the environment directory you want:
 ```bash
 cd environments/dev   # or qa / prod
-terragrunt plan --terragrunt-tfpath tofu
-terragrunt apply --terragrunt-tfpath tofu -auto-approve
-terragrunt destroy --terragrunt-tfpath tofu -auto-approve
+terragrunt plan --tf-path tofu
+terragrunt apply --tf-path tofu -auto-approve
+terragrunt destroy --tf-path tofu -auto-approve
 ```
 
 After apply, fetch outputs such as the public IP:
 ```bash
-terragrunt output --terragrunt-tfpath tofu instance_external_ip
+terragrunt output --tf-path tofu instance_external_ip
 ```
 
 ## What Gets Deployed
