@@ -1,4 +1,4 @@
-name: OpenTofu Destroy
+name: Terragrunt Destroy
 
 on:
   workflow_dispatch:
@@ -7,6 +7,10 @@ on:
         description: "Type DESTROY to confirm OpenTofu destroy"
         required: true
         default: "NO"
+        type: choice
+        options:
+          - NO
+          - DESTROY
 
 permissions:
   contents: read
@@ -16,16 +20,21 @@ jobs:
   destroy:
     if: github.event.inputs.confirm == 'DESTROY'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [dev, qa, prod]
+    defaults:
+      run:
+        shell: bash
+        working-directory: environments/${{ matrix.environment }}
+    env:
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      GCS_BUCKET: ${{ vars.GCP_GCS_BUCKET }}
+      TG_STATE_PREFIX: ${{ github.repository }}/opentofu
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set Opentofu variables
-        run: |
-          echo "TF_VAR_project_id=${{ vars.GCP_PROJECT_ID }}" >> $GITHUB_ENV
-          echo "TF_VAR_region=${{ vars.GCP_REGION }}" >> $GITHUB_ENV
-          echo "TF_VAR_zone=${{ vars.GCP_ZONE }}" >> $GITHUB_ENV
-          
       - name: Authenticate to Google Cloud (OIDC)
         uses: google-github-actions/auth@v2
         with:
@@ -38,13 +47,11 @@ jobs:
         with:
           tofu_version: "1.10.0"
 
-      - name: OpenTofu Init
-        env:
-          GCS_BUCKET: ${{ vars.GCP_GCS_BUCKET }}
+      - name: Install Terragrunt
         run: |
-          tofu init -upgrade \
-            -backend-config="bucket=${GCS_BUCKET}" \
-            -backend-config="prefix=${{ github.repository }}/opentofu/${{ github.ref_name }}"
+          TG_VERSION="v0.95.1"
+          curl -sL "https://github.com/gruntwork-io/terragrunt/releases/download/${TG_VERSION}/terragrunt_linux_amd64" -o /usr/local/bin/terragrunt
+          chmod +x /usr/local/bin/terragrunt
 
-      - name: Opentofu Destroy
-        run: tofu destroy -auto-approve
+      - name: Terragrunt Destroy
+        run: terragrunt destroy --terragrunt-tfpath tofu --terragrunt-non-interactive -auto-approve

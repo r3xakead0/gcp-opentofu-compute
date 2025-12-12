@@ -4,9 +4,10 @@ Infrastructure-as-code example that provisions a small web stack on Google Cloud
 
 ## Requirements
 - OpenTofu `>= 1.10.0`
+- Terragrunt `>= 0.95.0`
 - `gcloud` CLI with Application Default Credentials (`gcloud auth application-default login`) or a `GOOGLE_APPLICATION_CREDENTIALS` service account key
 - GCP project with billing enabled
-- GCS bucket for remote state (the `gcs` backend is defined in `versions.tf`)
+- GCS bucket for remote state
 - Permissions: ability to create compute and network resources (e.g., Compute Admin + Compute Network Admin) and write to the state bucket
 
 ## Installation / Setup
@@ -23,36 +24,32 @@ Infrastructure-as-code example that provisions a small web stack on Google Cloud
    ```bash
    gcloud auth application-default login
    ```
-4. Update `terraform.tfvars` (or your own tfvars file) with project details and any overrides. Key inputs:
-   - `project_id`: target GCP project
-   - `region` / `zone`: deployment location (defaults to `us-central1` / `us-central1-a`)
-   - `network_name`, `subnetwork_cidr`, `network_tags`, `firewall_sources`
-   - `instance_name`, `machine_type`
 
-## Usage
-Initialize with your state bucket (add `prefix=` if desired):
+## Terragrunt layout
+- `modules/`: Network and compute reusable modules
+- `environments/{dev,qa,prod}/terragrunt.hcl`: per-environment inputs that call the root stack
+- `terragrunt.hcl` (root): shared remote state config for all environments
+
+## Usage with Terragrunt
+Set the project and bucket before running commands:
 ```bash
-opentofu init -backend-config="bucket=<STATE_BUCKET>"
+export GCP_PROJECT_ID="<your-project-id>"
+export GCS_BUCKET="<state-bucket>"
+# Optional: prefix to namespace state objects (defaults to "terragrunt")
+export TG_STATE_PREFIX="<repo>/opentofu"
 ```
 
-Review the plan using your variable file:
+Plan/apply/destroy from the environment directory you want:
 ```bash
-opentofu plan -var-file=terraform.tfvars
-```
-
-Apply to create the VPC, firewall, and web VM:
-```bash
-opentofu apply -var-file=terraform.tfvars
+cd environments/dev   # or qa / prod
+terragrunt plan --terragrunt-tfpath tofu
+terragrunt apply --terragrunt-tfpath tofu -auto-approve
+terragrunt destroy --terragrunt-tfpath tofu -auto-approve
 ```
 
 After apply, fetch outputs such as the public IP:
 ```bash
-opentofu output instance_external_ip
-```
-
-Clean up when finished:
-```bash
-opentofu destroy -var-file=terraform.tfvars
+terragrunt output --terragrunt-tfpath tofu instance_external_ip
 ```
 
 ## What Gets Deployed
